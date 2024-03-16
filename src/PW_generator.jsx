@@ -1,7 +1,13 @@
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, {
+  Fragment,
+  useRef,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 const PW_generator = () => {
-  const [length, setLength] = useState(6);
+  const [length, setLength] = useState(12);
   const [numberAllowd, isNumberAllowed] = useState(true);
   const [specialCharacterAllowed, isSpecialCharcteeAllowed] = useState(true);
   const [createdPW, setCreatedPW] = useState("");
@@ -17,11 +23,24 @@ const PW_generator = () => {
       pass += str.charAt(charLength);
     }
     setCreatedPW(pass);
-  }, [length, numberAllowd, specialCharacterAllowed, setCreatedPW]);
+  }, [length, numberAllowd, specialCharacterAllowed]);
+
+  //useRef is used to store value of password for reference
+
+  const passwordRef = useRef(null);
+
+  const ClipboardHandler = useCallback(() => {
+    // The below line command select the copied value for the user reference and the "?" is use to checkthe value optionally
+    passwordRef.current?.select();
+    window.navigator.clipboard.writeText(createdPW);
+  }, [createdPW]);
+
+  //useEffect hook is used here because whenever their is any changes in the length, numberAllowd, specialCharacterAllowed
+  // field the whole page will get re-rendered
 
   useEffect(
     () => PasswordGenerator(),
-    [length, numberAllowd, specialCharacterAllowed, setCreatedPW]
+    [length, numberAllowd, specialCharacterAllowed]
   );
   return (
     <Fragment>
@@ -36,9 +55,13 @@ const PW_generator = () => {
             name="password"
             placeholder="Password"
             value={createdPW}
+            ref={passwordRef}
             readOnly
           />
-          <button className="outline-none ml-4 p-2 rounded-full shadow-lg text-white bg-blue-500">
+          <button
+            className="outline-none ml-4 p-2 rounded-full shadow-lg text-white bg-blue-500"
+            onClick={ClipboardHandler}
+          >
             Copy
           </button>
 
@@ -56,7 +79,6 @@ const PW_generator = () => {
               type="range"
               id="range"
               min={6}
-              defaultValue={12}
               max={30}
               value={length}
               onChange={(e) => setLength(e.target.value)}
